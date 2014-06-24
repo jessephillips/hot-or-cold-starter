@@ -3,9 +3,28 @@ var globalSecret = 101;
 var globalGuessNum  = 101;
 var globalGuessPrev   = 101;
 var globalGuessCount = 0;
+var boolWin = false;
 
 $(document).ready(function(){
-	
+	/*--- start new game on page load ---*/
+	startNewGame();
+
+	/*--- make a guess ---*/
+	$("form").on('click', '#guessButton', function(e) {
+		e.preventDefault();
+		if ( boolWin ) { // user just won, so this click should start a new game
+			startNewGame();
+		} else { // user hasn't won yet, so loging a guess.
+			var userGuessBox = $("form").find('#userGuess');
+			makeGuess(userGuessBox.val());
+			userGuessBox.val("");
+			if ( globalSecret == globalGuessNum ) {
+				boolWin = true;
+				$('#guessButton').val("Start New Game");
+			}
+		}
+	});
+
 	/*--- Display information modal box ---*/
   	$(".what").click(function(){
     	$(".overlay").fadeIn(1000);
@@ -16,9 +35,6 @@ $(document).ready(function(){
   	$("a.close").click(function(){
   		$(".overlay").fadeOut(1000);
   	});
-
-  	/*--- start new game on page load ---*/
-  	startNewGame();
 
 });
 
@@ -31,6 +47,7 @@ function startNewGame() {
 	$('#feedback').text('Make your Guess!'); // reset feedback text
 	$('#guessList').empty(); // remove all guesses
 	$('#count').text("0"); // set guess count on the screen to 0
+	$('#guessButton').val("Guess");
 }
 
 function makeGuess (guess) {
