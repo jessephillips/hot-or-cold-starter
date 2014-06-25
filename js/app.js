@@ -9,20 +9,34 @@ $(document).ready(function(){
 	/*--- start new game on page load ---*/
 	startNewGame();
 
+	/*--- start new game on click +New Game link ---*/
+	$('nav').on('click', '.new', function(e) {
+		e.preventDefault();
+		startNewGame();
+	});
+
 	/*--- make a guess ---*/
 	$("form").on('click', '#guessButton', function(e) {
 		e.preventDefault();
-		if ( boolWin ) { // user just won, so this click should start a new game
-			startNewGame();
-		} else { // user hasn't won yet, so loging a guess.
-			var userGuessBox = $("form").find('#userGuess');
-			makeGuess(userGuessBox.val());
-			userGuessBox.val("");
-			if ( globalSecret == globalGuessNum ) {
-				boolWin = true;
-				$('#guessButton').val("Start New Game");
+		var userGuessBox = $("form").find('#userGuess');
+		var theGuess = userGuessBox.val();
+		
+		if ( !boolWin ) {
+				
+			if (validateInput(theGuess)) { // user hasn't won yet, so loging a guess.
+				console.log("got to make guess");
+				makeGuess(theGuess); // make a guess
+				if ( globalSecret == globalGuessNum ) {
+					boolWin = true;
+					$('#guessButton').val("Click +New Game");
+				}
 			}
+
+		} else {
+			alert("Click '+New Game' to start a new game");
 		}
+
+		userGuessBox.val(""); // either way remove the guess from the box
 	});
 
 	/*--- Display information modal box ---*/
@@ -39,6 +53,7 @@ $(document).ready(function(){
 });
 
 function startNewGame() {
+	boolWin = false;
 	globalGuessCount = 0; // set guess count to 0
 	globalGuessNum = 101;
 	globalGuessPrev = 101; // reset global guess & prevGuess
@@ -63,27 +78,54 @@ function makeGuess (guess) {
 
 function guessFeedback ( guess ) {
 	var howFarOff = Math.abs( globalSecret - guess );
+	var feedback = "---";
+	var distance = "...";
+
+	if (guess >= globalSecret ) {
+		feedback = "<- ";
+	} else {
+		feedback = "-> ";
+	}
 
 	if (howFarOff == 0 ) {
 		return "YOU GOT IT!";
 	} else if ( howFarOff < 3 ) {
-		return "super hot!";
+		distance = "super hot!";
 	} else if ( howFarOff < 5) {
-		return "very hot!";
+		distance = "very hot!";
 	} else if ( howFarOff < 10 ) {
-		return "hot!";
+		distance =  "hot!";
 	} else if ( howFarOff < 20 ) {
-		return "warm";
+		distance = "very warm";
 	} else if ( howFarOff < 30 ) {
-		return "tepid";
+		distance = "warm";
 	} else if ( howFarOff < 40 ) {
-		return "cool";
+		distance = "cool";
 	} else if ( howFarOff < 60 ) {
-		return "cold";
+		distance = "cold";
 	} else if ( howFarOff < 80 ) {
-		return "ice cold";
+		distance = "ice cold";
 	} else if ( howFarOff < 90 ) {
-		return "arctic";
+		distance = "arctic";
+	}
+
+	return feedback + distance;
+}
+
+function validateInput ( aGuess ) {
+	var stringToNum = +aGuess;
+
+	if ( isNaN(stringToNum) ) {
+		alert("you must enter a number between 1-100. you entered: " + aGuess + ". Please try again." );
+		return false;
+	} else if ( stringToNum % 1 != 0 ) {
+		alert("You must enter an integer (non-decimal) between 1-100. You entered: " + stringToNum + ". Please try again.");
+		return false;
+	} else if ( stringToNum > 100 || stringToNum < 1 ) {
+		alert("You must enter a number between 1-100. you entered: " + stringToNum );
+		return false;
+	} else {
+		return true;
 	}
 
 }
